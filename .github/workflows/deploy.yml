@@ -1,0 +1,42 @@
+name: Build and Deploy to Azure App Service
+
+on:
+  push:
+    branches:
+      - main
+      - develop
+
+env:
+  ACR_NAME: 'se4453acr10' # Example ACR name, can be changed
+  APP_SERVICE_NAME: 'se4453-app-10' # Example App Service name, can be changed
+
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Checkout Code
+      uses: actions/checkout@v4
+
+    - name: Azure Login
+      uses: azure/login@v2
+      with:
+        creds: ${{ secrets.AZURE_CREDENTIALS }}
+
+    - name: Login to Azure Container Registry
+      uses: azure/docker-login@v1
+      with:
+        login-server: ${{ env.ACR_NAME }}.azurecr.io
+        username: ${{ secrets.REGISTRY_USERNAME }}
+        password: ${{ secrets.REGISTRY_PASSWORD }}
+
+    - name: Build and Push Docker Image
+      run: |
+        docker build -t ${{ env.ACR_NAME }}.azurecr.io/${{ env.APP_SERVICE_NAME }}:${{ github.sha }} .
+        docker push ${{ env.ACR_NAME }}.azurecr.io/${{ env.APP_SERVICE_NAME }}:${{ github.sha }}
+
+    - name: Deploy to Azure App Service
+      uses: azure/webapps-deploy@v2
+      with:
+        app-name: ${{ env.APP_SERVICE_NAME }}
+        images: '${{ env.ACR_NAME }}.azurecr.io/${{ env.APP_SERVICE_NAME }}:${{ github.sha }}'
