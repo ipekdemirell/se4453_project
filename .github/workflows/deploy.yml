@@ -7,8 +7,8 @@ on:
       - develop
 
 env:
-  ACR_NAME: 'se4453acr10' # Example ACR name, can be changed
-  APP_SERVICE_NAME: 'se4453-app-10' # Example App Service name, can be changed
+  ACR_NAME: 'se4453acripek'
+  APP_SERVICE_NAME: 'se4453-app'
 
 jobs:
   build-and-deploy:
